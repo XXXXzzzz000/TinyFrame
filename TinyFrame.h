@@ -99,14 +99,14 @@ typedef enum {
 } TF_Result;
 
 
-/** Data structure for sending / receiving messages */
+/** 发送/接收 Message 数据结构 */
 typedef struct TF_Msg_ {
     TF_ID frame_id;       //!< message ID
     bool is_response;     //!< internal flag, set when using the Respond function. frame_id is then kept unchanged.
-    TF_TYPE type;         //!< received or sent message type
+    TF_TYPE type;         //!< 接收或发送信息的类型
 
     /**
-     * Buffer of received data, or data to send.
+     * 发送或接收的 Buffer
      *
      * - If (data == NULL) in an ID listener, that means the listener timed out and
      *   the user should free any userdata and take other appropriate actions.
@@ -141,11 +141,11 @@ static inline void TF_ClearMsg(TF_Msg *msg)
 typedef struct TinyFrame_ TinyFrame;
 
 /**
- * TinyFrame Type Listener callback
+ * TinyFrame Type Listener 回调
  *
- * @param tf - instance
- * @param msg - the received message, userdata is populated inside the object
- * @return listener result
+ * @param tf - TinyFrame实例
+ * @param msg - 接收到的信息, userdata is populated inside the object
+ * @return listener 结果
  */
 typedef TF_Result (*TF_Listener)(TinyFrame *tf, TF_Msg *msg);
 

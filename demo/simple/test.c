@@ -3,13 +3,16 @@
 #include "../../TinyFrame.h"
 #include "../utils.h"
 
+/**
+ * 发送接收示例
+ */
 TinyFrame *demo_tf;
 
-bool do_corrupt = false;
+bool do_corrupt = false;   
 
 /**
- * This function should be defined in the application code.
- * It implements the lowest layer - sending bytes to UART (or other)
+ * 此功能应在应用程序代码中定义。
+ * 它实现了最低层 - 发送字节到UART（或其他）
  */
 void TF_WriteImpl(TinyFrame *tf, const uint8_t *buff, uint32_t len)
 {
@@ -24,11 +27,11 @@ void TF_WriteImpl(TinyFrame *tf, const uint8_t *buff, uint32_t len)
     
     dumpFrame(xbuff, len);
 
-    // Send it back as if we received it
+    // 将它发回，就好像我们收到了它
     TF_Accept(tf, xbuff, len);
 }
 
-/** An example listener function */
+/** 一个监听器函数的示例 */
 TF_Result myListener(TinyFrame *tf, TF_Msg *msg)
 {
     dumpFrameInfo(msg);
@@ -47,8 +50,9 @@ void main(void)
     TF_Msg msg;
     const char *longstr = "Lorem ipsum dolor sit amet.";
 
-    // Set up the TinyFrame library
+    //设置TinyFrame库
     demo_tf = TF_Init(TF_MASTER); // 1 = master, 0 = slave
+    // 添加lintener
     TF_AddGenericListener(demo_tf, myListener);
 
     printf("------ Simulate sending a message --------\n");
@@ -61,7 +65,7 @@ void main(void)
 
     msg.type = 0x33;
     msg.data = (pu8) longstr;
-    msg.len = (TF_LEN) (strlen(longstr) + 1); // add the null byte
+    msg.len = (TF_LEN) (strlen(longstr) + 1); // 添加null类型
     TF_Send(demo_tf, &msg);
 
     msg.type = 0x44;
@@ -75,7 +79,7 @@ void main(void)
     
     printf("This should fail:\n");
     
-    // test checksums are tested
+    // 测试校验和
     do_corrupt = true;    
     msg.type = 0x44;
     msg.data = (pu8) "Hello2";

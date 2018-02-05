@@ -3,13 +3,16 @@
 #include "../../TinyFrame.h"
 #include "../utils.h"
 
+/**
+ * 
+ */
 TinyFrame *demo_tf;
 
 extern const char *romeo;
 
 /**
- * This function should be defined in the application code.
- * It implements the lowest layer - sending bytes to UART (or other)
+ * 此功能应在应用程序代码中定义。
+ * 它实现了最低层 - 发送字节到 UART（或其他）
  */
 void TF_WriteImpl(TinyFrame *tf, const uint8_t *buff, uint32_t len)
 {
@@ -17,11 +20,11 @@ void TF_WriteImpl(TinyFrame *tf, const uint8_t *buff, uint32_t len)
     printf("\033[32mTF_WriteImpl - sending frame:\033[0m\n");
     dumpFrame(buff, len);
 
-    // Send it back as if we received it
+    // 将它发回，就好像我们收到了它
     TF_Accept(tf, buff, len);
 }
 
-/** An example listener function */
+/** 一个监听器函数的示例 */
 TF_Result myListener(TinyFrame *tf, TF_Msg *msg)
 {
     (void)tf;
@@ -39,13 +42,13 @@ void main(void)
 {
     TF_Msg msg;
 
-    // Set up the TinyFrame library
+        //设置TinyFrame库
     demo_tf = TF_Init(TF_MASTER); // 1 = master, 0 = slave
     TF_AddGenericListener(demo_tf, myListener);
 
     printf("------ Simulate sending a LOOONG message --------\n");
 
-    // We prepare a message without .data but with a set .len
+    // 我们准备一个没有 data但是有一个len的消息.
     TF_ClearMsg(&msg);
     msg.type = 0x22;
     msg.len = (TF_LEN) strlen(romeo);
@@ -53,8 +56,8 @@ void main(void)
     // Start the multipart frame
     TF_Send_Multipart(demo_tf, &msg);
     
-    // Now we send the payload in as many pieces as we like.
-    // Careful - TF transmitter is locked until we close the multipart frame
+    // 现在我们发送我们想发送的有效载荷的数量。
+    // 注意 - TF transmitter 会被锁住直到我们关闭 multipart frame
     
     uint32_t remain = strlen(romeo);
     const uint8_t* toSend = (const uint8_t*)romeo;
@@ -62,14 +65,14 @@ void main(void)
     while (remain > 0) {
       uint32_t chunk = (remain>16) ? 16 : remain;
       
-      // Send a piece
+      // 发送一段
       TF_Multipart_Payload(demo_tf, toSend, chunk);
       
       remain -= chunk;
       toSend += chunk;
     }
     
-    // Done, close
+    // 完成,关闭
     TF_Multipart_Close(demo_tf);
 }
 

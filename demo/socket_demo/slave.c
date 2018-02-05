@@ -20,12 +20,12 @@ TF_Result replyListener(TinyFrame *tf, TF_Msg *msg)
     msg->len = (TF_LEN) strlen((const char *) msg->data);
     TF_Respond(tf, msg);
 
-    // unsolicited reply - will not be handled by the ID listener, which is already gone
+    //未经请求的回复 - 将不会由已经离开的ID侦听器处理
     msg->data = (const uint8_t *) "SPAM";
     msg->len = 5;
     TF_Respond(tf, msg);
 
-    // unrelated message
+    //无关的消息
     TF_SendSimple(tf, 77, (const uint8_t *) "NAZDAR", 7);
     return TF_STAY;
 }

@@ -3,6 +3,9 @@
 #include "../../TinyFrame.h"
 #include "../utils.h"
 
+/**
+ * 长数据示例
+ */
 TinyFrame *demo_tf;
 
 extern const char *romeo;
@@ -21,7 +24,7 @@ void TF_WriteImpl(TinyFrame *tf, const uint8_t *buff, uint32_t len)
     TF_Accept(tf, buff, len);
 }
 
-/** An example listener function */
+/** 一个监听器函数的示例 */
 TF_Result myListener(TinyFrame *tf, TF_Msg *msg)
 {
     (void)tf;
@@ -39,7 +42,7 @@ void main(void)
 {
     TF_Msg msg;
 
-    // Set up the TinyFrame library
+        //设置TinyFrame库
     demo_tf = TF_Init(TF_MASTER); // 1 = master, 0 = slave
     TF_AddGenericListener(demo_tf, myListener);
 

@@ -884,8 +884,8 @@ static bool _TF_FN TF_SendFrame_Begin(TinyFrame *tf, TF_Msg *msg, TF_Listener li
 }
 
 /**
- * Build and send a part (or all) of a frame body.
- * Caution: this does not check the total length against the length specified in the frame head
+ * 创建并发送一部分 (或全部)帧数据.
+ * 注意: this does not check the total length against the length specified in the frame head
  *
  * @param tf - instance
  * @param buff - bytes to write
