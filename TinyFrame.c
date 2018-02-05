@@ -698,7 +698,7 @@ void _TF_FN TF_AcceptChar(TinyFrame *tf, unsigned char c)
 
         case TFState_DATA_CKSUM:
             COLLECT_NUMBER(tf->ref_cksum, TF_CKSUM) {
-                // Check the header checksum against the computed value
+                // 根据计算值检查标题校验和
                 CKSUM_FINALIZE(tf->cksum);
                 if (!tf->discard_data) {
                     if (tf->cksum == tf->ref_cksum) {
