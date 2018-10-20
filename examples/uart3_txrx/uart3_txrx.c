@@ -5,29 +5,6 @@
  */
 TinyFrame *demo_tf;
 
-bool do_corrupt = false;
-
-/**
- * 此功能应在应用程序代码中定义。
- * 它实现了最低层 - 发送字节到UART（或其他）
- */
-// void TF_WriteImpl(TinyFrame *tf, const uint8_t *buff, uint32_t len)
-// {
-//     rt_kprintf("--------------------\n");
-//     rt_kprintf("\033[32mTF_WriteImpl - sending frame:\033[0m\n");
-
-//     uint8_t *xbuff = (uint8_t *)buff;
-//     if (do_corrupt)
-//     {
-//         rt_kprintf("(corrupting to test checksum checking...)\n");
-//         xbuff[8]++;
-//     }
-
-//     dumpFrame(xbuff, len);
-
-//     // 将它发回，就好像我们收到了它
-//     TF_Accept(tf, xbuff, len);
-// }
 
 /** 一个监听器函数的示例 */
 TF_Result myListener(TinyFrame *tf, TF_Msg *msg)
@@ -62,29 +39,24 @@ int tf_uart3_txrx(int argc, char **argv)
     msg.data = (pu8) "Hello TinyFrame";
     msg.len = 16;
     TF_Send(demo_tf, &msg);
+    rt_thread_delay(1 * RT_TICK_PER_SECOND);
 
     msg.type = 0x33;
     msg.data = (pu8)longstr;
     msg.len = (TF_LEN)(strlen(longstr) + 1); // 添加null类型
     TF_Send(demo_tf, &msg);
+    rt_thread_delay(1 * RT_TICK_PER_SECOND);
 
     msg.type = 0x44;
     msg.data = (pu8) "Hello2";
     msg.len = 7;
     TF_Send(demo_tf, &msg);
+    rt_thread_delay(1 * RT_TICK_PER_SECOND);
 
     msg.len = 0;
     msg.type = 0x77;
     TF_Query(demo_tf, &msg, testIdListener, 0);
-
-    rt_kprintf("This should fail:\n");
-
-    // 测试校验和
-    do_corrupt = true;
-    msg.type = 0x44;
-    msg.data = (pu8) "Hello2";
-    msg.len = 7;
-    TF_Send(demo_tf, &msg);
+    rt_thread_delay(1 * RT_TICK_PER_SECOND);
 }
 
 MSH_CMD_EXPORT(tf_uart3_txrx, tinyfram uart3 test);
