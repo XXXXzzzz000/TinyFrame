@@ -6,10 +6,11 @@
 #define TF_UTILS_H
 
 #include <stdio.h>
-#include "../TinyFrame.h"
+#include <TinyFrame.h>
+#include <rtthread.h>
 
 /** pointer to unsigned char */
-typedef unsigned char* pu8;
+typedef unsigned char *pu8;
 
 /**
  * Dump a binary frame as hex, dec and ASCII

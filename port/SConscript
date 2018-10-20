@@ -1,0 +1,13 @@
+
+import os
+from building import *
+
+cwd = GetCurrentDir()
+
+src = Glob('../src/*.c')
+src += Glob('*.c')
+path = [cwd + '/../inc',cwd]
+
+group = DefineGroup('TinyFrame', src, depend=['PKG_USING_TINYFRAME'], CPPPATH=path)
+
+Return('group')

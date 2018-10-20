@@ -1,0 +1,14 @@
+from building import *
+
+cwd     = GetCurrentDir()
+
+src    = Glob('utils/*.c')
+path   = [cwd + '/utils']
+
+if GetDepend(['PKG_TINYFRAME_USE_EXAMPLE']):
+    src    += Glob('uart3_txrx/*.c')
+    path   += [cwd + '/uart3_txrx']
+
+group = DefineGroup('TinyFrame', src, depend = ['PKG_TINYFRAME_USE_EXAMPLE'], CPPPATH = path)
+
+Return('group')
