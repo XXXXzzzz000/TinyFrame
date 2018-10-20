@@ -46,14 +46,13 @@ static rt_err_t uart_input3(rt_device_t dev, rt_size_t size)
 void TF_WriteImpl(TinyFrame *tf, const uint8_t *buff, uint32_t len)
 {
     TinyFramUserData *tfu = (TinyFramUserData *)tf->userdata;
-    if (tfu->serial != RT_NULL)
-    {
-        rt_device_write(tfu->serial, 0, buff, len);
-    }
-    else
-    {
-        RT_ASSERT(0);
-    }
+    RT_ASSERT(tfu->serial != RT_NULL)
+
+    // for (int i = 0; i < len; i++)
+    // {
+    //     rt_kprintf("%c", buff[i]);
+    // }
+    rt_device_write(tfu->serial, 0, buff, len);
 }
 
 static void tf_thread_entry(void *parameter)
@@ -68,6 +67,7 @@ static void tf_thread_entry(void *parameter)
         {
             rt_sem_take(&tfu->rx_sem, RT_WAITING_FOREVER);
         }
+        // rt_kprintf("%c", ch);
         TF_Accept(tf, &ch, 1);
         TF_Tick(tf);
     }
@@ -75,30 +75,30 @@ static void tf_thread_entry(void *parameter)
 
 static int _tf_uart_init(TinyFrame *tf, TinyFramUserData *tfu, char *uart_name, rt_err_t (*rx_ind)(rt_device_t dev, rt_size_t size))
 {
-    rt_device_t serial = RT_NULL;
-    static struct rt_semaphore *rx_sem = RT_NULL;
 
+    tf->userdata = tfu;
     /* init sem */
-    rx_sem = &tfu->rx_sem;
+
     char buf[PKG_TINYFRAME_UART_NAME_MAX_LEN + 6] = {0};
     char sem_name[] = "_rx_sem";
     memcpy(buf, uart_name, strlen(uart_name) + 1);
     strcat(buf, sem_name);
-    rt_sem_init((rt_sem_t)&rx_sem, buf, 0, RT_IPC_FLAG_FIFO);
+    rt_kprintf("sem name:%s\n", buf);
+    rt_sem_init(&tfu->rx_sem, buf, 0, RT_IPC_FLAG_FIFO);
 
     /* init uart */
-    memcpy(tfu->uart_name, uart_name, strlen(uart_name) + 1);
+    int uart_len = strlen(uart_name) + 1;
+
+    RT_ASSERT(uart_len < PKG_TINYFRAME_UART_NAME_MAX_LEN);
+    memcpy(tfu->uart_name, uart_name, uart_len);
     tfu->serial = rt_device_find(tfu->uart_name);
-    serial = tfu->serial;
-    if (serial == RT_NULL)
-    {
-        RT_ASSERT(0);
-    }
-    rt_device_open(serial, RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_INT_RX);
 
-    rt_device_set_rx_indicate(serial, rx_ind);
+    RT_ASSERT(tfu->serial != RT_NULL);
 
-    tf->userdata = tfu;
+    rt_device_open(tfu->serial, RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_INT_RX);
+
+    rt_device_set_rx_indicate(tfu->serial, rx_ind);
+
     /* creat thread */
     rt_thread_t thread = rt_thread_create("serial", tf_thread_entry, tf, 1024, 25, 10);
     if (thread != RT_NULL)
