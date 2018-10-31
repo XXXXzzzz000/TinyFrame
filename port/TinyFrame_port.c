@@ -1,11 +1,5 @@
 // #include "../inc/TinyFrame.h"
 #include "TinyFrame_port.h"
-typedef struct
-{
-    rt_device_t serial;
-    struct rt_semaphore rx_sem;
-    char uart_name[PKG_TINYFRAME_UART_NAME_MAX_LEN];
-} TinyFramUserData;
 
 #ifdef PKG_TINYFRAME_USE_UART1
 TinyFrame tf1;
@@ -48,10 +42,6 @@ void TF_WriteImpl(TinyFrame *tf, const uint8_t *buff, uint32_t len)
     TinyFramUserData *tfu = (TinyFramUserData *)tf->userdata;
     RT_ASSERT(tfu->serial != RT_NULL)
 
-    // for (int i = 0; i < len; i++)
-    // {
-    //     rt_kprintf("%c", buff[i]);
-    // }
     rt_device_write(tfu->serial, 0, buff, len);
 }
 
@@ -68,8 +58,16 @@ static void tf_thread_entry(void *parameter)
             rt_sem_take(&tfu->rx_sem, RT_WAITING_FOREVER);
         }
         // rt_kprintf("%c", ch);
-        TF_Accept(tf, &ch, 1);
-        TF_Tick(tf);
+
+        if (tfu->enable_rx)
+        {
+            TF_Accept(tf, &ch, 1);
+        }
+        if (tfu->enable_rx_cb && tfu->rx_cb != NULL)
+        {
+            tfu->rx_cb(ch);
+        }
+        // TF_Tick(tf);
     }
 }
 
@@ -108,7 +106,38 @@ static int _tf_uart_init(TinyFrame *tf, TinyFramUserData *tfu, char *uart_name, 
     return 0;
 }
 
-int tf_uart_init(void)
+int TFEX_OpenReceive(TinyFrame *tf)
+{
+    TinyFramUserData *tfu = tf->userdata;
+    tfu->enable_rx = 1;
+    return 0;
+}
+int TFEX_CloseReceive(TinyFrame *tf)
+{
+    TinyFramUserData *tfu = tf->userdata;
+    tfu->enable_rx = 0;
+    return 0;
+}
+int TFEX_OpenReceiveCb(TinyFrame *tf)
+{
+    TinyFramUserData *tfu = tf->userdata;
+    tfu->enable_rx_cb = 1;
+    return 0;
+}
+int TFEX_CloseReceiveCb(TinyFrame *tf)
+{
+    TinyFramUserData *tfu = tf->userdata;
+    tfu->enable_rx_cb = 0;
+    return 0;
+}
+int TFEX_SetReceiveCb(TinyFrame *tf, void (*rx_cb)(uint8_t data))
+{
+    TinyFramUserData *tfu = tf->userdata;
+    tfu->rx_cb = rx_cb;
+    return 0;
+}
+
+static int tf_uart_init(void)
 {
 #ifdef PKG_TINYFRAME_USE_UART1
     _tf_uart_init(&tf1, &tfu1, "uart1", uart_input1);
