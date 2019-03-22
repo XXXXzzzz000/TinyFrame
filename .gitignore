@@ -38,3 +38,4 @@ tf.bin
 
 .idea/
 
+.vscode/ipch/*
